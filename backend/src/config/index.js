@@ -23,6 +23,18 @@ const config = {
     maxTokens: parseInt(process.env.ANTHROPIC_MAX_TOKENS || '2048', 10),
   },
 
+  // Local Hebrew LLM (Phase 2)
+  // DictaLM 2.0 or other Hebrew-focused models
+  localHebrewLLM: {
+    enabled: process.env.LOCAL_HEBREW_LLM_ENABLED === 'true',
+    endpoint: process.env.LOCAL_HEBREW_LLM_ENDPOINT || 'http://localhost:11434', // Ollama default
+    model: process.env.LOCAL_HEBREW_LLM_MODEL || 'dicta-il/dictalm2.0-instruct',
+    backend: process.env.LOCAL_HEBREW_LLM_BACKEND || 'ollama', // ollama, lmstudio, vllm, openai-compatible
+    maxTokens: parseInt(process.env.LOCAL_HEBREW_LLM_MAX_TOKENS || '2048', 10),
+    temperature: parseFloat(process.env.LOCAL_HEBREW_LLM_TEMPERATURE || '0.7'),
+    timeout: parseInt(process.env.LOCAL_HEBREW_LLM_TIMEOUT || '120000', 10), // 2 minutes
+  },
+
   // Rate Limiting
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 minutes
