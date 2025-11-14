@@ -1,6 +1,13 @@
 import { generatePictureMatchingPrompt } from '../templates/pictureMatchingPrompt.js';
 import { generateSequencingPrompt } from '../templates/sequencingPrompt.js';
 import { generateArticulationPrompt } from '../templates/articulationPrompt.js';
+import {
+  generateHebrewArticulationPrompt,
+  generateRhymingPrompt,
+  generateMorphologicalPrompt,
+  generateProsodyPrompt,
+  generateBilingualPrompt
+} from '../templates/hebrew/index.js';
 import logger from '../config/logger.js';
 
 /**
@@ -13,13 +20,13 @@ class PromptAssembler {
    * @returns {string} - Assembled prompt
    */
   assemblePrompt(params) {
-    const { activityType } = params;
+    const { activityType, language = 'en' } = params;
 
     if (!activityType) {
       throw new Error('activityType is required');
     }
 
-    logger.info(`Assembling prompt for activity type: ${activityType}`);
+    logger.info(`Assembling prompt for activity type: ${activityType}, language: ${language}`);
 
     let prompt;
 
@@ -33,7 +40,28 @@ class PromptAssembler {
         break;
 
       case 'articulation':
-        prompt = generateArticulationPrompt(params);
+        // Use Hebrew-specific template for Hebrew activities
+        if (language === 'he') {
+          prompt = generateHebrewArticulationPrompt(params);
+        } else {
+          prompt = generateArticulationPrompt(params);
+        }
+        break;
+
+      case 'rhyming':
+        prompt = generateRhymingPrompt(params);
+        break;
+
+      case 'morphological':
+        prompt = generateMorphologicalPrompt(params);
+        break;
+
+      case 'prosody':
+        prompt = generateProsodyPrompt(params);
+        break;
+
+      case 'bilingual':
+        prompt = generateBilingualPrompt(params);
         break;
 
       default:
@@ -66,7 +94,15 @@ class PromptAssembler {
     }
 
     // Validate activity type
-    const validActivityTypes = ['picture_matching', 'sequencing', 'articulation'];
+    const validActivityTypes = [
+      'picture_matching',
+      'sequencing',
+      'articulation',
+      'rhyming',
+      'morphological',
+      'prosody',
+      'bilingual'
+    ];
     if (!validActivityTypes.includes(activityType)) {
       throw new Error(`Invalid activityType. Must be one of: ${validActivityTypes.join(', ')}`);
     }
@@ -113,6 +149,26 @@ class PromptAssembler {
         '2-3': 4,
         '3-4': 6,
         '4-6': 10
+      },
+      'rhyming': {
+        '2-3': 3,
+        '3-4': 5,
+        '4-6': 7
+      },
+      'morphological': {
+        '2-3': 2,
+        '3-4': 3,
+        '4-6': 5
+      },
+      'prosody': {
+        '2-3': 4,
+        '3-4': 6,
+        '4-6': 8
+      },
+      'bilingual': {
+        '2-3': 5,
+        '3-4': 8,
+        '4-6': 12
       }
     };
 

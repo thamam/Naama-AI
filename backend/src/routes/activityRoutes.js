@@ -19,7 +19,7 @@ router.use(authenticate);
 // Validation middleware
 const generateValidation = [
   body('activityType')
-    .isIn(['picture_matching', 'sequencing', 'articulation'])
+    .isIn(['picture_matching', 'sequencing', 'articulation', 'rhyming', 'morphological', 'prosody', 'bilingual'])
     .withMessage('Invalid activity type'),
   body('ageGroup')
     .isIn(['2-3', '3-4', '4-6'])
@@ -35,7 +35,19 @@ const generateValidation = [
   body('itemCount')
     .optional()
     .isInt({ min: 1, max: 20 })
-    .withMessage('Item count must be between 1 and 20')
+    .withMessage('Item count must be between 1 and 20'),
+  body('theme')
+    .optional()
+    .isString()
+    .withMessage('Theme must be a string'),
+  body('nikudLevel')
+    .optional()
+    .isIn(['none', 'minimal', 'partial', 'full'])
+    .withMessage('Nikud level must be one of: none, minimal, partial, full'),
+  body('soundPosition')
+    .optional()
+    .isIn(['initial', 'medial', 'final', 'any'])
+    .withMessage('Sound position must be one of: initial, medial, final, any')
 ];
 
 const listValidation = [
@@ -49,7 +61,7 @@ const listValidation = [
     .withMessage('Skip must be a non-negative integer'),
   query('type')
     .optional()
-    .isIn(['picture_matching', 'sequencing', 'articulation'])
+    .isIn(['picture_matching', 'sequencing', 'articulation', 'rhyming', 'morphological', 'prosody', 'bilingual'])
     .withMessage('Invalid activity type'),
   query('ageGroup')
     .optional()

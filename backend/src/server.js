@@ -9,6 +9,8 @@ import { errorHandler, notFound } from './middleware/errorHandler.js';
 import { generalLimiter } from './middleware/rateLimiter.js';
 import authRoutes from './routes/authRoutes.js';
 import activityRoutes from './routes/activityRoutes.js';
+import feedbackRoutes from './routes/feedbackRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
 
 // Validate configuration
 try {
@@ -75,6 +77,8 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/activities', activityRoutes);
+app.use('/api/feedback', feedbackRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // API documentation endpoint
 app.get('/api', (req, res) => {
@@ -96,6 +100,21 @@ app.get('/api', (req, res) => {
         get: 'GET /api/activities/:id',
         delete: 'DELETE /api/activities/:id',
         stats: 'GET /api/activities/stats'
+      },
+      feedback: {
+        submit: 'POST /api/feedback',
+        getByActivity: 'GET /api/feedback/activity/:id',
+        getUserFeedback: 'GET /api/feedback/user',
+        getStats: 'GET /api/feedback/stats',
+        update: 'PATCH /api/feedback/:id',
+        delete: 'DELETE /api/feedback/:id'
+      },
+      analytics: {
+        summary: 'GET /api/analytics/summary',
+        activities: 'GET /api/analytics/activities',
+        costs: 'GET /api/analytics/costs',
+        quality: 'GET /api/analytics/quality',
+        hebrew: 'GET /api/analytics/hebrew'
       }
     },
     documentation: `${config.apiBaseUrl}/api/docs`
