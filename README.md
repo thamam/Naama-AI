@@ -54,6 +54,7 @@ Naama-AI is a comprehensive speech therapy platform specifically designed for Is
 ## 📋 Table of Contents
 
 - [Quick Start](#quick-start)
+- [Project Structure](#project-structure)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -88,28 +89,62 @@ Naama-AI is a comprehensive speech therapy platform specifically designed for Is
 git clone https://github.com/thamam/Naama-AI.git
 cd Naama-AI
 
-# Install dependencies
-cd backend && npm install
-cd ../frontend && npm install
+# Install frontend dependencies (from root directory)
+npm install
+
+# Install backend dependencies
+cd backend && npm install && cd ..
 
 # Set up environment variables
 cp backend/.env.example backend/.env
 # Edit .env with your configuration
 
-# Start local Hebrew LLM (Ollama)
+# Start local Hebrew LLM (Ollama) - OPTIONAL
 ollama pull dicta/dictalm2.0-instruct
 ollama serve
 
-# Start backend server
+# Start backend server (in one terminal)
 cd backend && npm run dev
 
-# Start frontend (in another terminal)
-cd frontend && npm run dev
+# Start frontend (in another terminal, from root directory)
+npm run dev
 
 # Access at http://localhost:3000
 ```
 
+**Note:** Do NOT open `index.html` directly in your browser. This is a Vite-based React application that requires the development server to run properly.
+
 **👉 See detailed setup:** [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
+
+---
+
+## 📁 Project Structure
+
+```
+Naama-AI/
+├── backend/              # Backend API (Node.js + Express)
+│   ├── config/          # Configuration files
+│   ├── controllers/     # Request handlers
+│   ├── models/          # Database models
+│   ├── routes/          # API routes
+│   ├── services/        # Business logic & Hebrew NLP
+│   ├── tests/           # Integration tests
+│   └── server.js        # Entry point
+├── src/                 # Frontend source (React + Vite)
+│   ├── components/      # React components
+│   ├── data/            # Static data
+│   └── utils/           # Utility functions
+├── dist/                # Frontend build output (generated)
+├── index.html           # Frontend entry point (requires Vite)
+├── package.json         # Frontend dependencies
+├── vite.config.js       # Vite configuration
+└── README.md            # This file
+```
+
+**Important Notes:**
+- **Frontend** is in the ROOT directory (not in a `frontend/` folder)
+- **Backend** is in the `backend/` directory
+- Do NOT open `index.html` directly - use `npm run dev` to start the Vite dev server
 
 ---
 
@@ -178,23 +213,29 @@ npm run dev
 
 ### Frontend Setup
 
+**Important:** The frontend code is located in the ROOT directory of the repository, not in a separate `frontend` folder.
+
 ```bash
-cd frontend
+# From the root directory of Naama-AI
 
 # Install dependencies
 npm install
 
-# Create environment file
-cp .env.example .env
-
-# Edit with backend URL
-nano .env
+# Create environment file (if needed)
+# The frontend will connect to backend at http://localhost:5000 by default
 
 # Start development server
 npm run dev
 
-# App runs on http://localhost:3000
+# App runs on http://localhost:3000 (opens automatically)
 ```
+
+**Available commands:**
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Build for production (outputs to `dist/`)
+- `npm run preview` - Preview production build locally
+
+**Note:** The `index.html` file requires Vite to process JSX/React code. Opening it directly in a browser will result in a blank page.
 
 ### Verify Installation
 
