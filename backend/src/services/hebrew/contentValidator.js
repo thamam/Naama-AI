@@ -10,11 +10,11 @@
  * Ensures all generated activities meet clinical and linguistic standards
  */
 
-const logger = require('../../config/logger');
-const phoneticProcessor = require('./phoneticProcessor');
-const morphologicalAnalyzer = require('./morphologicalAnalyzer');
-const nikudAssigner = require('./nikudAssigner');
-const vocabularyBank = require('./vocabularyBank');
+import logger from '../../config/logger.js';
+import phoneticProcessor from './phoneticProcessor.js';
+import morphologicalAnalyzer from './morphologicalAnalyzer.js';
+import nikudAssigner from './nikudAssigner.js';
+import vocabularyBank from './vocabularyBank.js';
 
 /**
  * Validation rules configuration
@@ -558,4 +558,4 @@ class HebrewContentValidator {
 }
 
 // Export singleton instance
-module.exports = new HebrewContentValidator();
+export default new HebrewContentValidator();

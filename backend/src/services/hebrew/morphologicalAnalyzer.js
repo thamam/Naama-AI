@@ -13,7 +13,7 @@
  * - Phonological complexity
  */
 
-const logger = require('../../config/logger');
+import logger from '../../config/logger.js';
 
 /**
  * Common Hebrew roots for speech therapy activities
@@ -484,4 +484,4 @@ class HebrewMorphologicalAnalyzer {
 }
 
 // Export singleton instance
-module.exports = new HebrewMorphologicalAnalyzer();
+export default new HebrewMorphologicalAnalyzer();

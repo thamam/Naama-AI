@@ -99,8 +99,9 @@ cd backend && npm install && cd ..
 cp backend/.env.example backend/.env
 # Edit .env with your configuration
 
-# Start local Hebrew LLM (Ollama) - OPTIONAL
-ollama pull dicta/dictalm2.0-instruct
+# Start local Hebrew LLM (Ollama) - OPTIONAL but RECOMMENDED
+# Install Ollama first: curl https://ollama.ai/install.sh | sh
+ollama pull llama3.2
 ollama serve
 
 # Start backend server (in one terminal)
@@ -165,12 +166,21 @@ Choose ONE of:
 # Install Ollama: https://ollama.ai
 curl https://ollama.ai/install.sh | sh
 
-# Pull Hebrew model
-ollama pull dicta/dictalm2.0-instruct
+# Pull llama3.2 model (3.2B parameters with Hebrew support)
+# Note: DictaLM 2.0 is not currently available in Ollama registry
+ollama pull llama3.2
 
-# Start service
+# Start service (runs on http://localhost:11434)
 ollama serve
+
+# Verify installation
+curl http://localhost:11434/api/tags
 ```
+
+**Important Notes:**
+- First generation request will be slow (cold start, ~2 minutes) while model loads
+- Subsequent requests will be fast (~2-5 seconds)
+- Increase timeout in `.env` if needed: `LOCAL_HEBREW_LLM_TIMEOUT=300000` (5 minutes)
 
 **Option B: LM Studio**
 - Download from: https://lmstudio.ai
@@ -197,10 +207,14 @@ npm install
 cp .env.example .env
 
 # Edit .env with your configuration:
-# - MONGODB_URI
-# - ANTHROPIC_API_KEY
-# - LOCAL_HEBREW_LLM settings
+# - MONGODB_URI (MongoDB Atlas or local MongoDB)
+# - NAAMA_CLAUDE_API_KEY (separate from Claude Code, optional if using local LLM only)
+# - LOCAL_HEBREW_LLM settings (enable and configure Ollama)
 nano .env
+
+# Secure API key setup (alternative to manual editing)
+# This script helps set the Claude API key without exposing it in terminal history
+bash scripts/set-api-key.sh
 
 # Run database migrations (if needed)
 npm run migrate
@@ -251,6 +265,52 @@ npm run dev
    ```
 
 3. **Generate test activity** (see API_DOCUMENTATION.md)
+
+### Troubleshooting Ollama
+
+**Issue: First activity generation times out**
+```bash
+# This is expected! First request loads the model (cold start)
+# Solution: Test Ollama directly to warm it up
+curl http://localhost:11434/api/generate -d '{
+  "model": "llama3.2",
+  "prompt": "שלום, מה שלומך?",
+  "stream": false
+}'
+
+# After this completes, subsequent requests will be fast
+```
+
+**Issue: Ollama not responding**
+```bash
+# Check if Ollama is running
+curl http://localhost:11434/api/tags
+
+# If not running, start it
+ollama serve
+
+# Check available models
+ollama list
+```
+
+**Issue: Model not found**
+```bash
+# Pull the model again
+ollama pull llama3.2
+
+# Verify it's available
+ollama list
+```
+
+**Issue: Backend still using Claude API instead of local LLM**
+```bash
+# Check your .env file has:
+# LOCAL_HEBREW_LLM_ENABLED=true
+# LOCAL_HEBREW_LLM_MODEL=llama3.2
+# LOCAL_HEBREW_LLM_ENDPOINT=http://localhost:11434
+
+# Restart backend to pick up changes
+```
 
 ---
 

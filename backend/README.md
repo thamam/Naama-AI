@@ -19,8 +19,9 @@ Backend API server for the Naama-AI Speech Therapy Activity Generator. This serv
 
 - ✅ **RESTful API** with Express.js
 - ✅ **JWT Authentication** for secure access
-- ✅ **LLM Integration** with Anthropic Claude 3.5 Haiku
-- ✅ **Provider Abstraction** for easy LLM switching
+- ✅ **Hybrid LLM Integration** with Local Hebrew LLM (Ollama) + Claude API
+- ✅ **Intelligent Provider Routing** - Hebrew→Local, English→Claude
+- ✅ **Provider Abstraction** for easy LLM switching with automatic failover
 - ✅ **MongoDB Database** for data persistence
 - ✅ **Rate Limiting** to control costs and prevent abuse
 - ✅ **Input Validation** with express-validator
@@ -35,7 +36,8 @@ Before you begin, ensure you have the following installed:
 
 - **Node.js** 18.x or higher
 - **MongoDB** 6.0 or higher (local or MongoDB Atlas)
-- **Anthropic API Key** (get one at https://console.anthropic.com/)
+- **Ollama** (recommended for local Hebrew LLM) - https://ollama.ai
+- **Anthropic API Key** (optional, for English/fallback) - https://console.anthropic.com/
 
 Check versions:
 ```bash
@@ -86,6 +88,41 @@ net start MongoDB
 3. Get connection string
 4. Use it in `.env` file
 
+### 4. Set Up Local Hebrew LLM (Recommended)
+
+**Install Ollama:**
+```bash
+# Install Ollama
+curl https://ollama.ai/install.sh | sh
+
+# Pull llama3.2 model (3.2B parameters with Hebrew support)
+ollama pull llama3.2
+
+# Start Ollama service
+ollama serve
+```
+
+**Verify Installation:**
+```bash
+# Check Ollama is running
+curl http://localhost:11434/api/tags
+
+# Expected output: JSON with installed models including llama3.2
+
+# Test Hebrew generation (warm-up)
+curl http://localhost:11434/api/generate -d '{
+  "model": "llama3.2",
+  "prompt": "שלום, מה שלומך?",
+  "stream": false
+}'
+```
+
+**Important Notes:**
+- First generation request will be slow (cold start, ~2 minutes)
+- Subsequent requests will be fast (~2-5 seconds)
+- Ollama runs on port 11434 by default
+- Enable in `.env` with `LOCAL_HEBREW_LLM_ENABLED=true`
+
 ## Configuration
 
 ### 1. Create Environment File
@@ -113,10 +150,21 @@ MONGODB_URI=mongodb://localhost:27017/naama-ai
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
 JWT_EXPIRES_IN=7d
 
-# Anthropic Claude API
-ANTHROPIC_API_KEY=sk-ant-your-api-key-here
-ANTHROPIC_MODEL=claude-3-5-haiku-20241022
-ANTHROPIC_MAX_TOKENS=2048
+# Claude API (for Naama-AI backend only - separate from Claude Code)
+# OPTIONAL if using local LLM only
+NAAMA_CLAUDE_API_KEY=sk-ant-your-api-key-here
+CLAUDE_MODEL=claude-3-5-haiku-20241022
+CLAUDE_MAX_TOKENS=2048
+
+# Local Hebrew LLM (Recommended for Hebrew activities)
+# Install: curl https://ollama.ai/install.sh | sh && ollama pull llama3.2
+LOCAL_HEBREW_LLM_ENABLED=true
+LOCAL_HEBREW_LLM_ENDPOINT=http://localhost:11434
+LOCAL_HEBREW_LLM_MODEL=llama3.2
+LOCAL_HEBREW_LLM_BACKEND=ollama
+LOCAL_HEBREW_LLM_MAX_TOKENS=2048
+LOCAL_HEBREW_LLM_TEMPERATURE=0.7
+LOCAL_HEBREW_LLM_TIMEOUT=300000  # 5 minutes (first request is slow)
 
 # Rate Limiting
 RATE_LIMIT_WINDOW_MS=900000  # 15 minutes
@@ -127,9 +175,11 @@ LOG_LEVEL=info
 ```
 
 **Important:**
-- Replace `ANTHROPIC_API_KEY` with your actual API key
+- `NAAMA_CLAUDE_API_KEY` is OPTIONAL if using local LLM only
 - Generate a strong JWT_SECRET for production (use: `openssl rand -base64 32`)
 - Update `MONGODB_URI` if using MongoDB Atlas or different port
+- Set `LOCAL_HEBREW_LLM_ENABLED=true` to use Ollama for Hebrew activities
+- Use `scripts/set-api-key.sh` for secure API key setup
 
 ### 3. Verify Configuration
 
@@ -154,15 +204,19 @@ npm start
 ### Expected Output
 
 ```
-2025-11-13 10:00:00 [info]: MongoDB Connected: localhost
-2025-11-13 10:00:00 [info]: LLM provider 'anthropic' initialized
-2025-11-13 10:00:00 [info]:
+2025-11-16 01:23:48 [info]: LocalHebrewProvider initialized with backend: ollama, model: llama3.2
+2025-11-16 01:23:48 [info]: LLM provider 'local_hebrew' initialized
+2025-11-16 01:23:48 [info]:
     ================================================
     🚀 Server running in development mode
     🌐 URL: http://localhost:5000
     📝 API: http://localhost:5000/api
     ================================================
+2025-11-16 01:23:48 [info]: Local Hebrew LLM is available
+2025-11-16 01:23:50 [info]: MongoDB Connected: ac-osscbmu-shard-00-02.avkhxd9.mongodb.net
 ```
+
+**Note:** If local LLM is disabled, you'll see `LLM provider 'anthropic' initialized` instead.
 
 ### Health Check
 
@@ -757,14 +811,50 @@ Solution:
 - Check connection string in `.env`
 - Ensure network access (whitelist IP for Atlas)
 
-**2. Anthropic API Error**
+**2. Anthropic/Claude API Error**
 ```
 Error: Invalid Anthropic API key
 ```
 Solution:
-- Verify API key in `.env`
+- This is OPTIONAL if using local LLM only
+- Verify `NAAMA_CLAUDE_API_KEY` in `.env`
 - Check key is active at console.anthropic.com
 - Ensure no extra spaces in `.env` file
+- Use `scripts/set-api-key.sh` for secure setup
+
+**2a. Local Hebrew LLM Timeout**
+```
+Error: TimeoutError: The operation was aborted due to timeout
+```
+Solution:
+- First generation is slow (cold start, ~2 minutes) - this is expected!
+- Warm up Ollama before testing:
+  ```bash
+  curl http://localhost:11434/api/generate -d '{
+    "model": "llama3.2",
+    "prompt": "שלום",
+    "stream": false
+  }'
+  ```
+- Increase timeout in `.env`: `LOCAL_HEBREW_LLM_TIMEOUT=300000`
+- Verify Ollama is running: `curl http://localhost:11434/api/tags`
+- Check model is installed: `ollama list`
+
+**2b. Ollama Not Running**
+```
+Error: connect ECONNREFUSED 127.0.0.1:11434
+```
+Solution:
+```bash
+# Start Ollama service
+ollama serve
+
+# Or check if it's already running
+curl http://localhost:11434/api/tags
+
+# Pull llama3.2 model if missing
+ollama pull llama3.2
+```
 
 **3. Port Already in Use**
 ```

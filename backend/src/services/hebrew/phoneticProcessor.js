@@ -11,7 +11,7 @@
  * Based on Hebrew phonological development research and clinical data
  */
 
-const logger = require('../../config/logger');
+import logger from '../../config/logger.js';
 
 /**
  * Hebrew Consonant Inventory
@@ -726,4 +726,4 @@ class HebrewPhoneticProcessor {
 }
 
 // Export singleton instance
-module.exports = new HebrewPhoneticProcessor();
+export default new HebrewPhoneticProcessor();

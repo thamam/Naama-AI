@@ -2,7 +2,7 @@ import llmFactory from './llm/LLMFactory.js';
 import promptAssembler from './promptAssembler.js';
 import Activity from '../models/Activity.js';
 import logger from '../config/logger.js';
-import * as hebrewServices from './hebrew/index.js';
+import hebrewServices from './hebrew/index.js';
 
 /**
  * Service to generate speech therapy activities using LLM

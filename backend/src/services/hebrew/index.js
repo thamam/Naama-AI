@@ -5,13 +5,21 @@
  * Provides comprehensive Hebrew linguistic processing for speech therapy
  */
 
-const morphologicalAnalyzer = require('./morphologicalAnalyzer');
-const phoneticProcessor = require('./phoneticProcessor');
-const nikudAssigner = require('./nikudAssigner');
-const vocabularyBank = require('./vocabularyBank');
-const contentValidator = require('./contentValidator');
+import morphologicalAnalyzer from './morphologicalAnalyzer.js';
+import phoneticProcessor from './phoneticProcessor.js';
+import nikudAssigner from './nikudAssigner.js';
+import vocabularyBank from './vocabularyBank.js';
+import contentValidator from './contentValidator.js';
 
-module.exports = {
+export {
+  morphologicalAnalyzer,
+  phoneticProcessor,
+  nikudAssigner,
+  vocabularyBank,
+  contentValidator
+};
+
+export default {
   morphologicalAnalyzer,
   phoneticProcessor,
   nikudAssigner,

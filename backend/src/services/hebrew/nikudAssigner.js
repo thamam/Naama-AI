@@ -13,7 +13,7 @@
  * - Aids in articulation precision
  */
 
-const logger = require('../../config/logger');
+import logger from '../../config/logger.js';
 
 /**
  * Nikud characters (Unicode)
@@ -461,4 +461,4 @@ class NikudAssigner {
 }
 
 // Export singleton instance
-module.exports = new NikudAssigner();
+export default new NikudAssigner();

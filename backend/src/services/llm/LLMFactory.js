@@ -69,9 +69,9 @@ class LLMFactory {
     switch (providerName.toLowerCase()) {
       case 'anthropic':
         provider = new AnthropicProvider({
-          apiKey: config.anthropic.apiKey,
-          model: config.anthropic.model,
-          maxTokens: config.anthropic.maxTokens
+          apiKey: config.claude.apiKey,
+          model: config.claude.model,
+          maxTokens: config.claude.maxTokens
         });
         break;
 

@@ -16,11 +16,11 @@ const config = {
   jwtSecret: process.env.JWT_SECRET || 'default-secret-change-me',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
 
-  // Anthropic Claude API
-  anthropic: {
-    apiKey: process.env.ANTHROPIC_API_KEY,
-    model: process.env.ANTHROPIC_MODEL || 'claude-3-5-haiku-20241022',
-    maxTokens: parseInt(process.env.ANTHROPIC_MAX_TOKENS || '2048', 10),
+  // Claude API (for Naama-AI only - separate from Claude Code)
+  claude: {
+    apiKey: process.env.NAAMA_CLAUDE_API_KEY,
+    model: process.env.CLAUDE_MODEL || 'claude-3-5-haiku-20241022',
+    maxTokens: parseInt(process.env.CLAUDE_MAX_TOKENS || '2048', 10),
   },
 
   // Local Hebrew LLM (Phase 2)
@@ -46,11 +46,16 @@ const config = {
 
   // Validation
   validate() {
-    const required = ['ANTHROPIC_API_KEY', 'JWT_SECRET'];
+    const required = ['JWT_SECRET'];
     const missing = required.filter(key => !process.env[key]);
 
     if (missing.length > 0) {
       throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+    }
+
+    // Require either Claude API or Local LLM to be configured
+    if (!this.claude.apiKey && !this.localHebrewLLM.enabled) {
+      throw new Error('Either NAAMA_CLAUDE_API_KEY or LOCAL_HEBREW_LLM_ENABLED must be set');
     }
 
     if (this.env === 'production' && this.jwtSecret === 'default-secret-change-me') {

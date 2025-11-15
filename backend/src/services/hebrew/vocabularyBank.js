@@ -14,9 +14,9 @@
  * - Word complexity
  */
 
-const logger = require('../../config/logger');
-const phoneticProcessor = require('./phoneticProcessor');
-const morphologicalAnalyzer = require('./morphologicalAnalyzer');
+import logger from '../../config/logger.js';
+import phoneticProcessor from './phoneticProcessor.js';
+import morphologicalAnalyzer from './morphologicalAnalyzer.js';
 
 /**
  * Thematic vocabulary organized by age group and cultural relevance
@@ -482,4 +482,4 @@ class VocabularyBank {
 }
 
 // Export singleton instance
-module.exports = new VocabularyBank();
+export default new VocabularyBank();
